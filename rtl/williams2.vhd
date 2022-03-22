@@ -58,8 +58,8 @@ port(
  video_g        : out std_logic_vector(3 downto 0);
  video_b        : out std_logic_vector(3 downto 0);
  video_i        : out std_logic_vector(3 downto 0);
- video_csync    : out std_logic;
- video_blankn   : out std_logic;
+ video_hblank   : out std_logic;
+ video_vblank   : out std_logic;
  video_hs       : out std_logic;
  video_vs       : out std_logic;
  
@@ -520,11 +520,11 @@ data_bus_high <=
 data_bus_low <=
 	palette_lo_do           when color_cs = '1' and addr_bus(0) = '0' else
 	palette_hi_do           when color_cs = '1' and addr_bus(0) = '1' else	
-	rom_do                  when rom_bank_cs = '1' else
---	rom_bank_a_do           when rom_bank_cs = '1' and (page = "010"                ) else
---	rom_bank_b_do           when rom_bank_cs = '1' and (page = "110"                ) else
---	rom_bank_c_do           when rom_bank_cs = '1' and (page = "001" or page = "011") else
---	rom_bank_d_do           when rom_bank_cs = '1' and (page = "100" or page = "101") else
+	-- rom_do                  when rom_bank_cs = '1' else
+	rom_bank_a_do           when rom_bank_cs = '1' and (page = "010"                ) else
+	rom_bank_b_do           when rom_bank_cs = '1' and (page = "110"                ) else
+	rom_bank_c_do           when rom_bank_cs = '1' and (page = "001" or page = "011") else
+	rom_bank_d_do           when rom_bank_cs = '1' and (page = "100" or page = "101") else
 	vram_h0_do & vram_l0_do when decod_do(7 downto 6)  = "00" else
 	vram_h1_do & vram_l1_do when decod_do(7 downto 6)  = "01" else
 	vram_h2_do & vram_l2_do when decod_do(7 downto 6)  = "10" else
@@ -1046,7 +1046,9 @@ port map
 );
 
 -- video syncs and blanks
-video_csync <= csync;
+
+video_hblank <= hblank;
+video_vblank <= vblank;
 
 process(clock_12)
 	constant hcnt_base : integer := 52;
@@ -1059,17 +1061,18 @@ if rising_edge(clock_12) then
   elsif hcnt = hcnt_base+6 then hsync0 <= '1';
   end if;
 
-  if    hcnt = hcnt_base+0     then hsync1 <= '0';
-  elsif hcnt = hcnt_base+3     then hsync1 <= '1';
-  elsif hcnt = hcnt_base+32-64 then hsync1 <= '0';
-  elsif hcnt = hcnt_base+35-64 then hsync1 <= '1';
-  end if;
+--   Removed for MiSTer
+--   if    hcnt = hcnt_base+0     then hsync1 <= '0';
+--   elsif hcnt = hcnt_base+3     then hsync1 <= '1';
+--   elsif hcnt = hcnt_base+32-64 then hsync1 <= '0';
+--   elsif hcnt = hcnt_base+35-64 then hsync1 <= '1';
+--   end if;
 
-  if    hcnt = hcnt_base+0        then hsync2 <= '0';
-  elsif hcnt = hcnt_base+32-3-64  then hsync2 <= '1';
-  elsif hcnt = hcnt_base+32-64    then hsync2 <= '0';
-  elsif hcnt = hcnt_base+64-3-128 then hsync2 <= '1';
-  end if;
+--   if    hcnt = hcnt_base+0        then hsync2 <= '0';
+--   elsif hcnt = hcnt_base+32-3-64  then hsync2 <= '1';
+--   elsif hcnt = hcnt_base+32-64    then hsync2 <= '0';
+--   elsif hcnt = hcnt_base+64-3-128 then hsync2 <= '1';
+--   end if;
   
   if hcnt = 63 and pixel_cnt = 5 then
 	 if vcnt = 502 then
@@ -1079,17 +1082,18 @@ if rising_edge(clock_12) then
     end if;
   end if;	 
 
-  if    vsync_cnt = 0 then csync <= hsync1;
-  elsif vsync_cnt = 1 then csync <= hsync1;
-  elsif vsync_cnt = 2 then csync <= hsync1;
-  elsif vsync_cnt = 3 then csync <= hsync2;
-  elsif vsync_cnt = 4 then csync <= hsync2;
-  elsif vsync_cnt = 5 then csync <= hsync2;
-  elsif vsync_cnt = 6 then csync <= hsync1;
-  elsif vsync_cnt = 7 then csync <= hsync1;
-  elsif vsync_cnt = 8 then csync <= hsync1;
-  else                     csync <= hsync0;
-  end if;
+--   Removed for MiSTer
+--   if    vsync_cnt = 0 then csync <= hsync1;
+--   elsif vsync_cnt = 1 then csync <= hsync1;
+--   elsif vsync_cnt = 2 then csync <= hsync1;
+--   elsif vsync_cnt = 3 then csync <= hsync2;
+--   elsif vsync_cnt = 4 then csync <= hsync2;
+--   elsif vsync_cnt = 5 then csync <= hsync2;
+--   elsif vsync_cnt = 6 then csync <= hsync1;
+--   elsif vsync_cnt = 7 then csync <= hsync1;
+--   elsif vsync_cnt = 8 then csync <= hsync1;
+--   else                     csync <= hsync0;
+--   end if;
 
   if    hcnt = 48 and pixel_cnt = 3 then hblank <= '1'; 
   elsif hcnt =  1 and pixel_cnt = 3 then hblank <= '0';
@@ -1100,7 +1104,7 @@ if rising_edge(clock_12) then
   end if;
 
   -- external sync and blank outputs
-  video_blankn <= not (hblank or vblank);
+--   video_blankn <= not (hblank or vblank);
 
   video_hs <= hsync0;
   

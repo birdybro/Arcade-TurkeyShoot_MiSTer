@@ -269,12 +269,12 @@ wire reset = RESET | status[0] | buttons[1];
 //////////////////////////////////////////////////////////////////
 
 // figure out buttons later, this is a lightgun game FYI
-wire m_gobble  = joy[8];
-wire m_grenade = joy[9];
+wire m_gobble  = joy[6];
+wire m_grenade = joy[5];
 
-wire m_start1  = joy[5];
-wire m_start2  = joy[6];
-wire m_coin    = joy[7];
+wire m_start1  = joy[7];
+wire m_start2  = joy[8];
+wire m_coin    = joy[9];
 wire m_trigger = joy[4];
 // wire m_pause  = joy[8];
 

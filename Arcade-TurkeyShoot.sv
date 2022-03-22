@@ -205,8 +205,8 @@ localparam CONF_STR = {
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
 	"R0,Reset;",
-	"J1,Fire,Grenade,Gobble,Start 1P,Start 2P,Coin;",
-	"jn,A,B,X,Start,Select,R;",
+	"J1,Fire,Grenade,Gobble,Start 1P,Start 2P,Coin,Pause;",
+	"jn,A,B,X,Start,Select,R,L;",
 	"V,v",`BUILD_DATE 
 };
 
@@ -268,7 +268,11 @@ wire reset = RESET | status[0] | buttons[1];
 
 //////////////////////////////////////////////////////////////////
 
-// figure out buttons later, this is a lightgun game FYI
+wire m_up      = joy[3];
+wire m_down    = joy[2];
+wire m_left    = joy[1];
+wire m_right   = joy[0];
+
 wire m_gobble  = joy[6];
 wire m_grenade = joy[5];
 
@@ -276,7 +280,7 @@ wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
 wire m_trigger = joy[4];
-// wire m_pause  = joy[8];
+wire m_pause   = joy[10];
 
 wire hblank, vblank;
 wire hs, vs;

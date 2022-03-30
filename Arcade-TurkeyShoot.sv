@@ -177,11 +177,11 @@ assign USER_OUT = '1;
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
-assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = '0;  
 
 assign VGA_F1 = 0;
 assign VGA_SCALER = 0;
 assign HDMI_FREEZE = 0;
+assign FB_FORCE_BLANK = 0;
 
 assign AUDIO_MIX = 0;
 
@@ -191,7 +191,7 @@ assign BUTTONS = 0;
 
 //////////////////////////////////////////////////////////////////
 
-assign LED_USER = 0;
+assign LED_USER  = ioctl_download;
 
 wire [1:0] ar = status[9:8];
 
@@ -203,6 +203,11 @@ localparam CONF_STR = {
 	"A.TURKEYSHOOT;;",
 	"-;",
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
+	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
+	"-;",
+	"OA,Advance,Off,On;",
+	"OB,Auto Up,Off,On;",
+	"OC,High Score Reset,Off,On;",
 	"-;",
 	"R0,Reset;",
 	"J1,Fire,Grenade,Gobble,Start 1P,Start 2P,Coin,Pause;",
@@ -213,17 +218,17 @@ localparam CONF_STR = {
 wire        forced_scandoubler;
 wire        direct_video;
 
+wire        ioctl_download;
 wire        ioctl_wr;
-wire [16:0] ioctl_addr;
-wire  [7:0] ioctl_dout;
-wire  [7:0] ioctl_din;
+wire [24:0] ioctl_addr;
+wire [ 7:0] ioctl_dout;
+wire [15:0] ioctl_index;
 
 wire  [1:0] buttons;
 wire [31:0] status;
 wire [10:0] ps2_key;
 
-wire [15:0] joystick_0;
-wire [15:0] joy = joystick_0;
+wire [15:0] joy
 
 wire [21:0] gamma_bus;
 
@@ -231,20 +236,24 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 (
 	.clk_sys(clk_sys),
 	.HPS_BUS(HPS_BUS),
+	.EXT_BUS(),
 
 	.buttons(buttons),
 	.status(status),
-	.status_menumask(direct_video),
+	.status_menumask({direct_video}),
+
 	.forced_scandoubler(forced_scandoubler),
 	.gamma_bus(gamma_bus),
 	.direct_video(direct_video),
 
+	.ioctl_download(ioctl_download),
 	.ioctl_wr(ioctl_wr),
 	.ioctl_addr(ioctl_addr),
 	.ioctl_dout(ioctl_dout),
-	.ioctl_din(ioctl_din),
+	.ioctl_index(ioctl_index),
 
-	.joystick_0(joystick_0)
+	.joystick_0(joy1),
+	.joystick_1(joy2)
 );
 
 ///////////////////////   CLOCKS   ///////////////////////////////
@@ -252,7 +261,6 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 wire clk_sys;
 wire pll_locked;
 wire clk_48,clk_12;
-wire clk_mem = clk_48;
 assign clk_sys=clk_12;
 
 pll pll
@@ -264,7 +272,7 @@ pll pll
 	.locked(pll_locked)
 );
 
-wire reset = RESET | status[0] | buttons[1];
+wire reset = RESET | status[0] | buttons[1] | ioctl_download;
 
 //////////////////////////////////////////////////////////////////
 
@@ -284,7 +292,17 @@ wire m_pause   = joy[10];
 
 wire hblank, vblank;
 wire hs, vs;
-wire [3:0] r,g,b;
+wire [3:0] r,g,b,intensity;
+wire [3:0] red,green,blue;
+wire [7:0] ri,gi,bi;
+
+assign ri = r*intensity;
+assign gi = g*intensity;
+assign bi = b*intensity;
+
+assign red = ri[7:4];
+assign blue = bi[7:4];
+assign green = gi[7:4];
 
 reg ce_pix;
 always @(posedge clk_48) begin
@@ -293,13 +311,13 @@ always @(posedge clk_48) begin
 	ce_pix <= !div;
 end
 
-arcade_video #(256,12) arcade_video
+arcade_video #(256,12,1) arcade_video
 (
         .*,
 
         .clk_video(clk_48),
 
-        .RGB_in({r,g,b}),
+        .RGB_in({red,green,blue}),
         .HBlank(hblank),
         .VBlank(vblank),
         .HSync(~hs),
@@ -309,7 +327,7 @@ arcade_video #(256,12) arcade_video
 );
 
 wire [7:0] audio;
-assign AUDIO_L = audio;
+assign AUDIO_L = {audio, 6'd0};
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
 
@@ -322,10 +340,14 @@ williams2 williams2
 	// .rom_do(ioctl_dout),   //  [7:0]
 	// .rom_rd(ioctl_wr),
 
+	.dn_addr(ioctl_addr[17:0]),
+	.dn_data(ioctl_dout),
+	.dn_wr(ioctl_wr && ioctl_index==0),
+
 	.video_r(r),           // [3:0]
 	.video_g(g),           // [3:0]
 	.video_b(b),           // [3:0]
-	.video_i(),            // [3:0] Color Intensity options
+	.video_i(intensity),            // [3:0] Color Intensity options
 	.video_hblank(hblank), // 48 <-> 1
 	.video_vblank(vblank), // 504 <-> 262
 	.video_hs(hs),
@@ -333,9 +355,9 @@ williams2 williams2
 
 	.audio_out(audio), // [7:0]
 
-	.btn_auto_up(),
-	.btn_advance(),
-	.btn_high_score_reset(),
+	.btn_auto_up(status[10]),
+	.btn_advance(status[11]),
+	.btn_high_score_reset(status[12]),
 
 	.btn_gobble(m_gobble),
 	.btn_grenade(m_grenade),

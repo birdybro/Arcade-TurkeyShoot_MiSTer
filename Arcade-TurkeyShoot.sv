@@ -344,10 +344,10 @@ williams2 williams2
 	.dn_data(ioctl_dout),
 	.dn_wr(ioctl_wr && ioctl_index==0),
 
-	.video_r(r),           // [3:0]
-	.video_g(g),           // [3:0]
-	.video_b(b),           // [3:0]
-	.video_i(intensity),            // [3:0] Color Intensity options
+	.video_r(r),
+	.video_g(g),
+	.video_b(b),
+	.video_i(intensity),
 	.video_hblank(hblank), // 48 <-> 1
 	.video_vblank(vblank), // 504 <-> 262
 	.video_hs(hs),

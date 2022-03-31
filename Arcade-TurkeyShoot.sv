@@ -228,7 +228,7 @@ wire  [1:0] buttons;
 wire [31:0] status;
 wire [10:0] ps2_key;
 
-wire [15:0] joy
+wire [15:0] joy;
 
 wire [21:0] gamma_bus;
 
@@ -290,53 +290,6 @@ wire m_start2  = joy[8];
 wire m_coin    = joy[9];
 wire m_trigger = joy[4];
 wire m_pause   = joy[10];
-
-wire left_r;
-wire right_r;
-wire up_r;
-wire down_r;
-wire cnt_4ms;
-wire gun_update_r;
-wire div_h, div_v [4:0];
-wire gun_h, gun_v [5:0];
-
-always @(posedge clk_12) begin
-	gun_update_r <= cnt_4ms;
-	if gun_update_r = 0 & cnt_4ms = 1 begin
-		left_r <= m_left;
-		right_r <= m_right;
-		up_r <= m_up;
-		down_r <= m_down;
-		
-		if ((m_left = 1 & left_r = 1) | (m_right = 1 & right_r = 1)) & div_h < 3 begin
-			div_h <= div_h + 1;
-		else
-			div_h = '0;
-		end
-
-		if m_left = 1 & div_h = 1 & gun_h > 0 begin
-			gun_h <= gun_h - 1;
-		end
-		if m_right = 1 & div_h = 1 & gun_h < 63 begin
-			gun_h <= gun_h + 1;
-		end
-
-		if ((m_up = 1 & up_r = 1) | (m_down = 1 & down_r = 1)) & div_v < 3 begin
-			div_v <= div_v + 1;
-		else
-			div_v <= '0;
-		end
-
-		if m_up = 1 & div_v = 1 & gun_v > 0 begin
-			gun_v <= gun_v - 1;
-		end
-		if m_down = 1 & div_v = 1 & gun_v < 63 begin
-			gun_v <= gun_v + 1;
-		end
-	end
-end
-
-
 
 
 // AUDIO VIDEO

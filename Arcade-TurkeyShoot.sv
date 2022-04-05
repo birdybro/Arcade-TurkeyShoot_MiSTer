@@ -210,8 +210,8 @@ localparam CONF_STR = {
 	"OC,High Score Reset,Off,On;",
 	"-;",
 	"R0,Reset;",
-	"J1,Fire,Grenade,Gobble,Start 1P,Start 2P,Coin,Pause;",
-	"jn,A,B,X,Start,Select,R,L;",
+	"J1,Fire,Grenade,Gobble,Start 1P,Start 2P,Coin;",
+	"jn,A,B,X,Start,Select,R;",
 	"V,v",`BUILD_DATE 
 };
 
@@ -277,35 +277,48 @@ wire reset = RESET | status[0] | buttons[1] | ioctl_download;
 //////////////////////////////////////////////////////////////////
 
 // PLAYER INPUTS
-wire m_up      = joy[3];
-wire m_down    = joy[2];
-wire m_left    = joy[1];
 wire m_right   = joy[0];
+wire m_left    = joy[1];
+wire m_down    = joy[2];
+wire m_up      = joy[3];
 
-wire m_gobble  = joy[6];
+wire m_trigger = joy[4];
 wire m_grenade = joy[5];
+wire m_gobble  = joy[6];
 
 wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
-wire m_trigger = joy[4];
-wire m_pause   = joy[10];
-
 
 // AUDIO VIDEO
 wire hblank, vblank;
 wire hs, vs;
-wire [3:0] r,g,b,intensity;
-wire [3:0] red,green,blue;
-wire [7:0] ri,gi,bi;
 
-assign ri = r*intensity;
-assign gi = g*intensity;
-assign bi = b*intensity;
+wire [ 3:0] r,g,b,intensity;
+wire [ 7:0] ri,gi,bi;
 
-assign red = ri[7:4];
-assign blue = bi[7:4];
-assign green = gi[7:4];
+wire [7:0] color_lut[256] = '{
+    8'd19, 8'd21, 8'd23,  8'd25,  8'd26,  8'd29,  8'd32,  8'd35,  8'd38,  8'd43,  8'd49,  8'd56,  8'd65,  8'd76,  8'd96,  8'd108,
+    8'd21, 8'd22, 8'd24,  8'd26,  8'd28,  8'd30,  8'd34,  8'd37,  8'd40,  8'd45,  8'd52,  8'd59,  8'd68,  8'd80,  8'd101, 8'd114,
+    8'd22, 8'd24, 8'd26,  8'd28,  8'd30,  8'd33,  8'd36,  8'd39,  8'd43,  8'd48,  8'd55,  8'd63,  8'd73,  8'd86,  8'd107, 8'd121,
+    8'd24, 8'd25, 8'd27,  8'd29,  8'd32,  8'd35,  8'd38,  8'd42,  8'd46,  8'd52,  8'd59,  8'd67,  8'd77,  8'd91,  8'd114, 8'd129,
+    8'd25, 8'd27, 8'd29,  8'd31,  8'd34,  8'd37,  8'd40,  8'd45,  8'd48,  8'd54,  8'd62,  8'd71,  8'd81,  8'd96,  8'd121, 8'd137,
+    8'd27, 8'd28, 8'd31,  8'd34,  8'd36,  8'd39,  8'd44,  8'd48,  8'd52,  8'd58,  8'd66,  8'd76,  8'd87,  8'd103, 8'd129, 8'd146,
+    8'd29, 8'd31, 8'd34,  8'd36,  8'd39,  8'd43,  8'd47,  8'd52,  8'd56,  8'd63,  8'd72,  8'd82,  8'd94,  8'd111, 8'd140, 8'd158,
+    8'd32, 8'd34, 8'd37,  8'd39,  8'd43,  8'd46,  8'd51,  8'd56,  8'd61,  8'd68,  8'd78,  8'd89,  8'd102, 8'd120, 8'd151, 8'd171,
+    8'd32, 8'd35, 8'd38,  8'd41,  8'd44,  8'd48,  8'd53,  8'd59,  8'd64,  8'd72,  8'd83,  8'd94,  8'd109, 8'd129, 8'd161, 8'd182,
+    8'd36, 8'd38, 8'd42,  8'd45,  8'd48,  8'd53,  8'd59,  8'd65,  8'd70,  8'd79,  8'd90,  8'd104, 8'd119, 8'd141, 8'd177, 8'd201,
+    8'd40, 8'd43, 8'd46,  8'd50,  8'd54,  8'd59,  8'd65,  8'd72,  8'd79,  8'd88,  8'd101, 8'd115, 8'd133, 8'd157, 8'd198, 8'd224,
+    8'd45, 8'd48, 8'd52,  8'd57,  8'd61,  8'd66,  8'd74,  8'd81,  8'd88,  8'd98,  8'd113, 8'd129, 8'd149, 8'd176, 8'd221, 8'd249,
+    8'd50, 8'd54, 8'd58,  8'd64,  8'd68,  8'd75,  8'd83,  8'd91,  8'd99,  8'd111, 8'd128, 8'd146, 8'd169, 8'd200, 8'd249, 8'd253,
+    8'd58, 8'd63, 8'd68,  8'd74,  8'd79,  8'd87,  8'd96,  8'd106, 8'd116, 8'd129, 8'd148, 8'd169, 8'd195, 8'd231, 8'd253, 8'd254,
+    8'd71, 8'd76, 8'd83,  8'd89,  8'd96,  8'd105, 8'd116, 8'd128, 8'd139, 8'd156, 8'd179, 8'd205, 8'd236, 8'd252, 8'd254, 8'd254,
+    8'd91, 8'd97, 8'd105, 8'd114, 8'd123, 8'd133, 8'd147, 8'd161, 8'd176, 8'd196, 8'd223, 8'd249, 8'd252, 8'd254, 8'd254, 8'd255
+};
+
+assign ri = ~| intensity ? 8'd0 : color_lut[{r, intensity}];
+assign gi = ~| intensity ? 8'd0 : color_lut[{g, intensity}];
+assign bi = ~| intensity ? 8'd0 : color_lut[{b, intensity}];
 
 reg ce_pix;
 always @(posedge clk_48) begin
@@ -314,13 +327,13 @@ always @(posedge clk_48) begin
 	ce_pix <= !div;
 end
 
-arcade_video #(256,12,1) arcade_video
+	arcade_video #(256,24,1) arcade_video
 (
         .*,
 
         .clk_video(clk_48),
 
-        .RGB_in({red,green,blue}),
+        .RGB_in({ri[7:0],gi[7:0],bi[7:0]}),
         .HBlank(hblank),
         .VBlank(vblank),
         .HSync(~hs),

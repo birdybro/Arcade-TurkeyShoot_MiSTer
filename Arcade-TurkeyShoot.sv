@@ -177,11 +177,11 @@ assign USER_OUT = '1;
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
+assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = '0; 
 
 assign VGA_F1 = 0;
 assign VGA_SCALER = 0;
 assign HDMI_FREEZE = 0;
-assign FB_FORCE_BLANK = 0;
 
 assign AUDIO_MIX = 0;
 
@@ -252,8 +252,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 	.ioctl_dout(ioctl_dout),
 	.ioctl_index(ioctl_index),
 
-	.joystick_0(joy1),
-	.joystick_1(joy2)
+	.joystick_0(joy)
 );
 
 ///////////////////////   CLOCKS   ///////////////////////////////
@@ -289,6 +288,9 @@ wire m_gobble  = joy[6];
 wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
+
+wire [1:0] gun_h = {m_right, m_left};
+wire [1:0] gun_v = {m_down, m_up};
 
 // AUDIO VIDEO
 wire hblank, vblank;
@@ -391,7 +393,7 @@ williams2 williams2
 	.gun_h(gun_h),
 	.gun_v(gun_v),
 
-	.cnt_4ms_o(cnt_4ms),
+	.cnt_4ms_o(),
 
 	.sw_coktail_table(),
 	.seven_seg(),

@@ -152,27 +152,27 @@ port map(
 	test_cc  => open
 );
 
--- -- cpu program rom
--- cpu_prog_rom : entity work.turkey_shoot_sound
--- port map(
---  clk  => clock_12,
---  addr => cpu_addr(12 downto 0),
---  data => rom_do
--- );
-
-rom_sound_cs <= '1' when dn_addr(17 downto 13) = "01111" else '0';
-cpu_prog_rom : work.dpram generic map (8,13)
-port map
-(
-	clk_a  => clock_12,
-	we_a   => dn_wr and rom_sound_cs,
-	addr_a => dn_addr(12 downto 0),
-	d_a    => dn_data,
-
-	clk_b  => clock_12,
-	addr_b => cpu_addr(12 downto 0),
-	q_b    => rom_do
+-- cpu program rom
+cpu_prog_rom : entity work.turkey_shoot_sound
+port map(
+ clk  => clock_12,
+ addr => cpu_addr(12 downto 0),
+ data => rom_do
 );
+
+-- rom_sound_cs <= '1' when dn_addr(17 downto 13) = "01111" else '0';
+-- cpu_prog_rom : work.dpram generic map (8,13)
+-- port map
+-- (
+-- 	clk_a  => clock_12,
+-- 	we_a   => dn_wr and rom_sound_cs,
+-- 	addr_a => dn_addr(12 downto 0),
+-- 	d_a    => dn_data,
+
+-- 	clk_b  => clock_12,
+-- 	addr_b => cpu_addr(12 downto 0),
+-- 	q_b    => rom_do
+-- );
 
 -- cpu wram 
 cpu_ram : entity work.gen_ram

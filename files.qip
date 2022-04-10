@@ -11,3 +11,15 @@ set_global_assignment -name VHDL_FILE rtl/pia6821.vhd
 set_global_assignment -name VHDL_FILE rtl/tshoot_cmos_ram.vhd
 set_global_assignment -name VHDL_FILE rtl/tshoot_sound_board.vhd
 set_global_assignment -name VHDL_FILE rtl/williams2.vhd
+
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_bank_a.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_bank_b.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_bank_c.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_bank_d.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_decoder.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_graph1.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_graph2.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_graph3.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_prog1.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_prog2.vhd
+set_global_assignment -name VHDL_FILE rtl/rom/turkey_shoot_sound.vhd

@@ -65,6 +65,7 @@ port(
  video_i        : out std_logic_vector(3 downto 0);
  video_hblank   : out std_logic;
  video_vblank   : out std_logic;
+ video_blankn   : out std_logic;
  video_hs       : out std_logic;
  video_vs       : out std_logic;
  
@@ -793,27 +794,27 @@ port map(
 	hold     => '0'       -- hold input (active high) extend bus cycle
 );
 
--- cpu program roms - IC9-10-54
-prog1_rom : entity work.turkey_shoot_prog1
-port map(
- clk  => clock_12,
- addr => addr_bus(11 downto 0),
- data => rom_prog1_do
-);
-
--- rom_prog1_cs <= '1' when dn_addr(17 downto 12) = "100101" else '0';
--- prog1_rom : work.dpram generic map (8,12)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_prog1_cs,
--- 	addr_a => dn_addr(11 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(11 downto 0),
--- 	q_b => rom_prog1_do
+-- -- cpu program roms - IC9-10-54
+-- prog1_rom : entity work.turkey_shoot_prog1
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(11 downto 0),
+--  data => rom_prog1_do
 -- );
+
+rom_prog1_cs <= '1' when dn_addr(17 downto 12) = "100101" else '0';
+prog1_rom : work.dpram generic map (8,12)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_prog1_cs,
+	addr_a => dn_addr(11 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(11 downto 0),
+	q_b => rom_prog1_do
+);
 
 prog2_rom : entity work.turkey_shoot_prog2
 port map(
@@ -837,159 +838,159 @@ port map(
 -- );
 
 
--- rom17.ic26 + rom15.ic24 
-bank_a_rom : entity work.turkey_shoot_bank_a
-port map(
- clk  => clock_12,
- addr => addr_bus(13 downto 0),
- data => rom_bank_a_do
-);
-
--- rom_bank_a_cs <= '1' when dn_addr(17 downto 14) = "1000" else '0';
--- bank_a_rom : work.dpram generic map (8,14)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_bank_a_cs,
--- 	addr_a => dn_addr(13 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(13 downto 0),
--- 	q_b => rom_bank_a_do
+-- -- rom17.ic26 + rom15.ic24 
+-- bank_a_rom : entity work.turkey_shoot_bank_a
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(13 downto 0),
+--  data => rom_bank_a_do
 -- );
 
--- rom16.ic25 + rom14.ic23 + rom13.ic21 + rom12.ic19 
-bank_b_rom : entity work.turkey_shoot_bank_b
-port map(
- clk  => clock_12,
- addr => addr_bus(14 downto 0),
- data => rom_bank_b_do
+rom_bank_a_cs <= '1' when dn_addr(17 downto 14) = "1000" else '0';
+bank_a_rom : work.dpram generic map (8,14)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_bank_a_cs,
+	addr_a => dn_addr(13 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(13 downto 0),
+	q_b => rom_bank_a_do
 );
 
--- rom_bank_b_cs <= '1' when dn_addr(17 downto 15) = "000" else '0';
--- bank_b_rom : work.dpram generic map (8,15)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_bank_b_cs,
--- 	addr_a => dn_addr(14 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(14 downto 0),
--- 	q_b => rom_bank_b_do
+-- -- rom16.ic25 + rom14.ic23 + rom13.ic21 + rom12.ic19 
+-- bank_b_rom : entity work.turkey_shoot_bank_b
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(14 downto 0),
+--  data => rom_bank_b_do
 -- );
 
--- rom11.ic18 + rom9.ic16 + rom7.ic14 + rom5.ic12 
-bank_c_rom : entity work.turkey_shoot_bank_c
-port map(
- clk  => clock_12,
- addr => addr_bus(14 downto 0),
- data => rom_bank_c_do
+rom_bank_b_cs <= '1' when dn_addr(17 downto 15) = "000" else '0';
+bank_b_rom : work.dpram generic map (8,15)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_bank_b_cs,
+	addr_a => dn_addr(14 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(14 downto 0),
+	q_b => rom_bank_b_do
 );
 
--- rom_bank_c_cs <= '1' when dn_addr(17 downto 15) = "001" else '0';
--- bank_c_rom : work.dpram generic map (8,15)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_bank_c_cs,
--- 	addr_a => dn_addr(14 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(14 downto 0),
--- 	q_b => rom_bank_c_do
+-- -- rom11.ic18 + rom9.ic16 + rom7.ic14 + rom5.ic12 
+-- bank_c_rom : entity work.turkey_shoot_bank_c
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(14 downto 0),
+--  data => rom_bank_c_do
 -- );
 
--- rom10.ic17 + rom8.ic15 + rom6.ic13 + rom4.ic11
-bank_d_rom : entity work.turkey_shoot_bank_d
-port map(
- clk  => clock_12,
- addr => addr_bus(14 downto 0),
- data => rom_bank_d_do
+rom_bank_c_cs <= '1' when dn_addr(17 downto 15) = "001" else '0';
+bank_c_rom : work.dpram generic map (8,15)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_bank_c_cs,
+	addr_a => dn_addr(14 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(14 downto 0),
+	q_b => rom_bank_c_do
 );
 
--- rom_bank_d_cs <= '1' when dn_addr(17 downto 15) = "010" else '0';
--- bank_d_rom : work.dpram generic map (8,15)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_bank_d_cs,
--- 	addr_a => dn_addr(14 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(14 downto 0),
--- 	q_b => rom_bank_d_do
+-- -- rom10.ic17 + rom8.ic15 + rom6.ic13 + rom4.ic11
+-- bank_d_rom : entity work.turkey_shoot_bank_d
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(14 downto 0),
+--  data => rom_bank_d_do
 -- );
 
--- rom20.ic57
-graph1_rom : entity work.turkey_shoot_graph1
-port map(
- clk  => clock_12,
- addr => graph_addr(12 downto 0),
- data => graph1_do
+rom_bank_d_cs <= '1' when dn_addr(17 downto 15) = "010" else '0';
+bank_d_rom : work.dpram generic map (8,15)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_bank_d_cs,
+	addr_a => dn_addr(14 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(14 downto 0),
+	q_b => rom_bank_d_do
 );
 
--- rom_graph1_cs <= '1' when dn_addr(17 downto 13) = "01100" else '0';
--- graph1_rom : work.dpram generic map (8,13)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_graph1_cs,
--- 	addr_a => dn_addr(12 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => graph_addr(12 downto 0),
--- 	q_b => graph1_do
+-- -- rom20.ic57
+-- graph1_rom : entity work.turkey_shoot_graph1
+-- port map(
+--  clk  => clock_12,
+--  addr => graph_addr(12 downto 0),
+--  data => graph1_do
 -- );
 
--- rom20.ic58
-graph2_rom : entity work.turkey_shoot_graph2
-port map(
- clk  => clock_12,
- addr => graph_addr(12 downto 0),
- data => graph2_do
+rom_graph1_cs <= '1' when dn_addr(17 downto 13) = "01100" else '0';
+graph1_rom : work.dpram generic map (8,13)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_graph1_cs,
+	addr_a => dn_addr(12 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => graph_addr(12 downto 0),
+	q_b => graph1_do
 );
 
--- rom_graph2_cs <= '1' when dn_addr(17 downto 13) = "01101" else '0';
--- graph2_rom : work.dpram generic map (8,13)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_graph2_cs,
--- 	addr_a => dn_addr(12 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => graph_addr(12 downto 0),
--- 	q_b => graph2_do
+-- -- rom20.ic58
+-- graph2_rom : entity work.turkey_shoot_graph2
+-- port map(
+--  clk  => clock_12,
+--  addr => graph_addr(12 downto 0),
+--  data => graph2_do
 -- );
 
--- rom20.ic41
-graph3_rom : entity work.turkey_shoot_graph3
-port map(
- clk  => clock_12,
- addr => graph_addr(12 downto 0),
- data => graph3_do
+rom_graph2_cs <= '1' when dn_addr(17 downto 13) = "01101" else '0';
+graph2_rom : work.dpram generic map (8,13)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_graph2_cs,
+	addr_a => dn_addr(12 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => graph_addr(12 downto 0),
+	q_b => graph2_do
 );
 
--- rom_graph3_cs <= '1' when dn_addr(17 downto 13) = "01110" else '0';
--- graph3_rom : work.dpram generic map (8,13)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_graph3_cs,
--- 	addr_a => dn_addr(12 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => graph_addr(12 downto 0),
--- 	q_b => graph3_do
+-- -- rom20.ic41
+-- graph3_rom : entity work.turkey_shoot_graph3
+-- port map(
+--  clk  => clock_12,
+--  addr => graph_addr(12 downto 0),
+--  data => graph3_do
 -- );
+
+rom_graph3_cs <= '1' when dn_addr(17 downto 13) = "01110" else '0';
+graph3_rom : work.dpram generic map (8,13)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_graph3_cs,
+	addr_a => dn_addr(12 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => graph_addr(12 downto 0),
+	q_b => graph3_do
+);
 
 -- cpu/video wram low 0 - IC102-105
 cpu_video_ram_l0 : entity work.gen_ram
@@ -1113,27 +1114,27 @@ port map(
  q    => cmos_do
 );
 
--- addr bus to video addr decoder - IC60
-video_addr_decoder : entity work.turkey_shoot_decoder
-port map(
- clk  => clock_12,
- addr => decod_addr,
- data => decod_do
-);
-
--- rom_decoder_cs <= '1' when dn_addr(17 downto 9) = "100110000" else '0';
--- video_addr_decoder : work.dpram generic map (8,9)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_decoder_cs,
--- 	addr_a => dn_addr(8 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => decod_addr,
--- 	q_b => decod_do
+-- -- addr bus to video addr decoder - IC60
+-- video_addr_decoder : entity work.turkey_shoot_decoder
+-- port map(
+--  clk  => clock_12,
+--  addr => decod_addr,
+--  data => decod_do
 -- );
+
+rom_decoder_cs <= '1' when dn_addr(17 downto 9) = "100110000" else '0';
+video_addr_decoder : work.dpram generic map (8,9)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_decoder_cs,
+	addr_a => dn_addr(8 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => decod_addr,
+	q_b => decod_do
+);
 
 -- gun gray code encoder
 gun_gray_encoder : entity work.gray_code
@@ -1260,7 +1261,7 @@ if rising_edge(clock_12) then
   end if;
 
 -- external sync and blank outputs
---  video_blankn <= not (hblank or vblank);
+ video_blankn <= not (hblank or vblank);
 
   video_hs <= hsync0;
   

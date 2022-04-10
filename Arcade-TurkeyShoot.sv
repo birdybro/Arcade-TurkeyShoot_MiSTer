@@ -191,12 +191,12 @@ assign BUTTONS = 0;
 
 //////////////////////////////////////////////////////////////////
 
-assign LED_USER  = ioctl_download;
+assign LED_USER  = 0;
 
 wire [1:0] ar = status[9:8];
 
-assign VIDEO_ARX = (!ar) ? 12'd4 : (ar - 1'd1);
-assign VIDEO_ARY = (!ar) ? 12'd3 : 12'd0;
+assign VIDEO_ARX = (!ar) ? 12'd909 : (ar - 1'd1);
+assign VIDEO_ARY = (!ar) ? 12'd763 : 12'd0;
 
 `include "build_id.v" 
 localparam CONF_STR = {
@@ -260,7 +260,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 wire clk_sys;
 wire pll_locked;
 wire clk_48,clk_12;
-assign clk_sys=clk_12;
+assign clk_sys = clk_12;
 
 pll pll
 (
@@ -271,7 +271,7 @@ pll pll
 	.locked(pll_locked)
 );
 
-wire reset = RESET | status[0] | buttons[1] | ioctl_download;
+wire reset = RESET | status[0] | buttons[1];
 
 //////////////////////////////////////////////////////////////////
 
@@ -300,10 +300,10 @@ always @(*) begin
 	end else if (clk_12 == 1'b1) begin
 		gun_update_r = cnt_4ms;
 		if ((gun_update_r == 1'b0) && (cnt_4ms == 1'b1)) begin
-			left_r <= m_left;
-			right_r <= m_right;
-			up_r <= m_up;
-			down_r <= m_down;
+			left_r  = m_left;
+			right_r = m_right;
+			up_r    = m_up;
+			down_r  = m_down;
 
 			if ((((m_left == 1'b1) && (left_r == 1'b1)) | ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 4'd3)) begin
 				div_h <= div_h + 4'b1;
@@ -335,8 +335,6 @@ always @(*) begin
 		end
 	end
 end
-
-
 
 // AUDIO VIDEO
 wire hblank, vblank;
@@ -406,10 +404,6 @@ williams2 williams2
 	.clock_12(clk_12),
 	.reset(reset),
 
-	// .rom_addr(ioctl_addr), // [16:0]
-	// .rom_do(ioctl_dout),   //  [7:0]
-	// .rom_rd(ioctl_wr),
-
 	.dn_addr(ioctl_addr[17:0]),
 	.dn_data(ioctl_dout),
 	.dn_wr(ioctl_wr && ioctl_index==0),
@@ -420,6 +414,7 @@ williams2 williams2
 	.video_i(intensity),
 	.video_hblank(hblank), // 48 <-> 1
 	.video_vblank(vblank), // 504 <-> 262
+	.video_blankn(!hblank | !vblank),
 	.video_hs(hs),
 	.video_vs(vs),
 

@@ -177,11 +177,11 @@ assign USER_OUT = '1;
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
+assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = '0; 
 
 assign VGA_F1 = 0;
 assign VGA_SCALER = 0;
 assign HDMI_FREEZE = 0;
-assign FB_FORCE_BLANK = 0;
 
 assign AUDIO_MIX = 0;
 
@@ -191,12 +191,12 @@ assign BUTTONS = 0;
 
 //////////////////////////////////////////////////////////////////
 
-assign LED_USER  = ioctl_download;
+assign LED_USER  = 0;
 
 wire [1:0] ar = status[9:8];
 
-assign VIDEO_ARX = (!ar) ? 12'd4 : (ar - 1'd1);
-assign VIDEO_ARY = (!ar) ? 12'd3 : 12'd0;
+assign VIDEO_ARX = (!ar) ? 12'd909 : (ar - 1'd1);
+assign VIDEO_ARY = (!ar) ? 12'd763 : 12'd0;
 
 `include "build_id.v" 
 localparam CONF_STR = {
@@ -252,8 +252,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 	.ioctl_dout(ioctl_dout),
 	.ioctl_index(ioctl_index),
 
-	.joystick_0(joy1),
-	.joystick_1(joy2)
+	.joystick_0(joy)
 );
 
 ///////////////////////   CLOCKS   ///////////////////////////////
@@ -261,7 +260,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 wire clk_sys;
 wire pll_locked;
 wire clk_48,clk_12;
-assign clk_sys=clk_12;
+assign clk_sys = clk_12;
 
 pll pll
 (
@@ -272,7 +271,7 @@ pll pll
 	.locked(pll_locked)
 );
 
-wire reset = RESET | status[0] | buttons[1] | ioctl_download;
+wire reset = RESET | status[0] | buttons[1];
 
 //////////////////////////////////////////////////////////////////
 
@@ -290,12 +289,63 @@ wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
 
+logic gun_update_r;
+logic cnt_4ms;
+logic left_r, right_r, up_r, down_r;
+logic [4:0] div_h, div_v;
+logic [5:0] gun_h, gun_v;
+
+always @(*) begin
+	if (reset == 1'b1) begin
+	end else if (clk_12 == 1'b1) begin
+		gun_update_r = cnt_4ms;
+		if ((gun_update_r == 1'b0) && (cnt_4ms == 1'b1)) begin
+			left_r  = m_left;
+			right_r = m_right;
+			up_r    = m_up;
+			down_r  = m_down;
+
+			if ((((m_left == 1'b1) && (left_r == 1'b1)) | ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 4'd3)) begin
+				div_h <= div_h + 4'b1;
+			end else begin
+				div_h <= 4'b0;
+			end
+
+			if ((m_left == 1'b1) && (div_h == 4'd1) && (gun_h > 5'd0)) begin
+				gun_h <= gun_h + 5'b1;
+			end
+
+			if ((m_right == 1'b1) && (div_h == 4'd1) && (gun_h < 5'd62)) begin
+				gun_h <= gun_h + 5'b1;
+			end
+
+			if ((((m_up == 1'b1) && (up_r == 1'b1)) | ((m_down == 1'b1) && (down_r == 1'b1))) && (div_v < 4'd3)) begin
+				div_v <= div_v + 4'b1;
+			end else begin
+				div_v <= 4'b0;
+			end
+
+			if ((m_up == 1'b1) && (div_v == 4'd1) && (gun_v > 5'd0)) begin
+				gun_v <= gun_v + 5'b1;
+			end
+
+			if ((m_right == 1'b1) && (div_v == 4'd1) && (gun_v < 5'd62)) begin
+				gun_v <= gun_v + 5'b1;
+			end
+		end
+	end
+end
+
 // AUDIO VIDEO
 wire hblank, vblank;
 wire hs, vs;
 
 wire [ 3:0] r,g,b,intensity;
 wire [ 7:0] ri,gi,bi;
+
+// 2 bits are swapped in these chips, necessary to fix color
+wire [3:0] r_swap ={r[1], r[2], r[3], r[0]};
+wire [3:0] b_swap ={b[1], b[2], b[3], b[0]};
 
 wire [7:0] color_lut[256] = '{
     8'd19, 8'd21, 8'd23,  8'd25,  8'd26,  8'd29,  8'd32,  8'd35,  8'd38,  8'd43,  8'd49,  8'd56,  8'd65,  8'd76,  8'd96,  8'd108,
@@ -316,9 +366,11 @@ wire [7:0] color_lut[256] = '{
     8'd91, 8'd97, 8'd105, 8'd114, 8'd123, 8'd133, 8'd147, 8'd161, 8'd176, 8'd196, 8'd223, 8'd249, 8'd252, 8'd254, 8'd254, 8'd255
 };
 
-assign ri = ~| intensity ? 8'd0 : color_lut[{r, intensity}];
-assign gi = ~| intensity ? 8'd0 : color_lut[{g, intensity}];
-assign bi = ~| intensity ? 8'd0 : color_lut[{b, intensity}];
+always @(posedge clk_48) begin : rgbOutput
+	ri = ~| intensity ? 8'd0 : color_lut[{r_swap, intensity}];
+	gi = ~| intensity ? 8'd0 : color_lut[{g, intensity}];
+	bi = ~| intensity ? 8'd0 : color_lut[{b_swap, intensity}];
+end
 
 reg ce_pix;
 always @(posedge clk_48) begin
@@ -327,7 +379,7 @@ always @(posedge clk_48) begin
 	ce_pix <= !div;
 end
 
-	arcade_video #(256,24,1) arcade_video
+	arcade_video #(313,24,1) arcade_video
 (
         .*,
 
@@ -352,10 +404,6 @@ williams2 williams2
 	.clock_12(clk_12),
 	.reset(reset),
 
-	// .rom_addr(ioctl_addr), // [16:0]
-	// .rom_do(ioctl_dout),   //  [7:0]
-	// .rom_rd(ioctl_wr),
-
 	.dn_addr(ioctl_addr[17:0]),
 	.dn_data(ioctl_dout),
 	.dn_wr(ioctl_wr && ioctl_index==0),
@@ -366,6 +414,7 @@ williams2 williams2
 	.video_i(intensity),
 	.video_hblank(hblank), // 48 <-> 1
 	.video_vblank(vblank), // 504 <-> 262
+	.video_blankn(!hblank | !vblank),
 	.video_hs(hs),
 	.video_vs(vs),
 

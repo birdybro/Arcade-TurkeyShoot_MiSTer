@@ -289,11 +289,11 @@ wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
 
-logic gun_update_r;
-logic cnt_4ms;
-logic left_r, right_r, up_r, down_r;
-logic [4:0] div_h, div_v;
-logic [5:0] gun_h, gun_v;
+wire gun_update_r;
+wire cnt_4ms;
+wire left_r, right_r, up_r, down_r;
+wire [4:0] div_h, div_v;
+wire [5:0] gun_h, gun_v;
 
 always @(*) begin
 	if (reset == 1'b1) begin
@@ -305,7 +305,7 @@ always @(*) begin
 			up_r    = m_up;
 			down_r  = m_down;
 
-			if ((((m_left == 1'b1) && (left_r == 1'b1)) | ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 4'd3)) begin
+			if ((((m_left == 1'b1) && (left_r == 1'b1)) || ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 4'd3)) begin
 				div_h <= div_h + 4'b1;
 			end else begin
 				div_h <= 4'b0;
@@ -319,7 +319,7 @@ always @(*) begin
 				gun_h <= gun_h + 5'b1;
 			end
 
-			if ((((m_up == 1'b1) && (up_r == 1'b1)) | ((m_down == 1'b1) && (down_r == 1'b1))) && (div_v < 4'd3)) begin
+			if ((((m_up == 1'b1) && (up_r == 1'b1)) || ((m_down == 1'b1) && (down_r == 1'b1))) && (div_v < 4'd3)) begin
 				div_v <= div_v + 4'b1;
 			end else begin
 				div_v <= 4'b0;

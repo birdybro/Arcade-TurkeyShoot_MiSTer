@@ -289,32 +289,54 @@ wire m_start1  = joy[7];
 wire m_start2  = joy[8];
 wire m_coin    = joy[9];
 
+logic gun_update_r;
 logic cnt_4ms;
+logic left_r, right_r, up_r, down_r;
 logic [4:0] div_h, div_v;
 logic [5:0] gun_h, gun_v;
 
-always @(posedge clk_12 or negedge reset) begin : gunPos
-	if ((cnt_4ms = 1)) begin
-		if (((m_left == 1) | (m_right == 1)) && (div_h < 3)) begin
-			div_h <= div_h + 1;
-		end
-		if ((m_left == 1) && (div_h == 1) && (gun_h > 0)) begin
-			gun_h <= gun_h - 1;
-		end
-		if ((m_right == 1) && (div_h == 1) && (gun_h < 63)) begin
-			gun_h <= gun_h + 1;
-		end
-		if (((m_up == 1) | (m_down == 1)) && (div_v < 3)) begin
-			div_v <= div_v + 1;
-		end
-		if ((m_up == 1) && (div_v == 1) && (gun_v > 0)) begin
-			gun_v <= gun_v - 1;
-		end
-		if ((m_down == 1) && (div_v == 1) && (gun_v < 63)) begin
-			gun_v <= gun_v + 1;
+always @(*) begin
+	if (reset == 1'b1) begin
+	end else if (clk_12 == 1'b1) begin
+		gun_update_r = cnt_4ms;
+		if ((gun_update_r == 1'b0) && (cnt_4ms == 1'b1)) begin
+			left_r <= m_left;
+			right_r <= m_right;
+			up_r <= m_up;
+			down_r <= m_down;
+
+			if ((((m_left == 1'b1) && (left_r == 1'b1)) | ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 4'd3)) begin
+				div_h <= div_h + 4'b1;
+			end else begin
+				div_h <= 4'b0;
+			end
+
+			if ((m_left == 1'b1) && (div_h == 4'd1) && (gun_h > 5'd0)) begin
+				gun_h <= gun_h + 5'b1;
+			end
+
+			if ((m_right == 1'b1) && (div_h == 4'd1) && (gun_h < 5'd62)) begin
+				gun_h <= gun_h + 5'b1;
+			end
+
+			if ((((m_up == 1'b1) && (up_r == 1'b1)) | ((m_down == 1'b1) && (down_r == 1'b1))) && (div_v < 4'd3)) begin
+				div_v <= div_v + 4'b1;
+			end else begin
+				div_v <= 4'b0;
+			end
+
+			if ((m_up == 1'b1) && (div_v == 4'd1) && (gun_v > 5'd0)) begin
+				gun_v <= gun_v + 5'b1;
+			end
+
+			if ((m_right == 1'b1) && (div_v == 4'd1) && (gun_v < 5'd62)) begin
+				gun_v <= gun_v + 5'b1;
+			end
 		end
 	end
 end
+
+
 
 // AUDIO VIDEO
 wire hblank, vblank;

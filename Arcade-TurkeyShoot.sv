@@ -295,35 +295,40 @@ logic left_r, right_r, up_r, down_r;
 logic [4:0] div_h, div_v;
 logic [5:0] gun_h, gun_v;
 
-always @(posedge clk_sys) begin
-	gun_update_r = cnt_4ms;
+always @(posedge clk_sys) begin : gunHV
+	gun_update_r <= cnt_4ms;
+	
 	if ((gun_update_r == 1'b0) && (cnt_4ms == 1'b1)) begin
+		left_r  = m_left;
+		right_r = m_right;
+		up_r    = m_up;
+		down_r  = m_down;
 
-		if (((m_left == 1'b1) || (m_right == 1'b1)) && (div_h < 5'd3)) begin
+		if ((((m_left == 1'b1) && (left_r == 1'b1)) || ((m_right == 1'b1) && (right_r == 1'b1))) && (div_h < 5'd3))
 			div_h <= div_h + 5'b1;
 		end else begin
 			div_h <= 5'b0;
 		end
 		if ((m_left == 1'b1) && (div_h == 5'd1) && (gun_h > 6'd0)) begin
-			gun_h <= gun_h + 5'b1;
+			gun_h <= gun_h - 6'b1;
 		end
 		if ((m_right == 1'b1) && (div_h == 5'd1) && (gun_h < 6'd63)) begin
-			gun_h <= gun_h + 5'b1;
+			gun_h <= gun_h + 6'b1;
 		end
 
-		if (((m_up == 1'b1) || (m_down == 1'b1)) && (div_v < 5'd3)) begin
+		if ((((m_up == 1'b1) && (up_r == 1'b1)) || ((m_down == 1'b1) && (down_r == 1'b1))) && (div_v < 5'd3)) begin
 			div_v <= div_v + 5'b1;
 		end else begin
 			div_v <= 5'b0;
 		end
 		if ((m_up == 1'b1) && (div_v == 5'd1) && (gun_v > 6'd0)) begin
+			gun_v <= gun_v - 6'b1;
+		end
+		if ((m_down == 1'b1) && (div_v == 5'd1) && (gun_v < 6'd63)) begin
 			gun_v <= gun_v + 6'b1;
 		end
-		if ((m_right == 1'b1) && (div_v == 5'd1) && (gun_v < 6'd63)) begin
-			gun_v <= gun_v + 6'b1;
-		end
-	end
 end
+
 
 // AUDIO VIDEO
 wire hblank, vblank;
@@ -425,7 +430,7 @@ williams2 williams2
 
 	.cnt_4ms_o(cnt_4ms),
 
-	.sw_coktail_table(),
+	.sw_coktail_table(0),
 	.seven_seg(),
 
 	.dbg_out()

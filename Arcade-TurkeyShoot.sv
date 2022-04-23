@@ -327,7 +327,7 @@ always @(posedge clk_12) begin : gunHV
 		if ((m_down == 1'b1) && (div_v == 5'd1) && (gun_v < 6'd63)) begin
 			gun_v <= gun_v + 6'b1;
 		end
-	end	
+	end
 end
 
 
@@ -339,8 +339,8 @@ wire [ 3:0] r,g,b,intensity;
 wire [ 7:0] ri,gi,bi;
 
 // 2 bits are swapped in these chips, necessary to fix color
-wire [3:0] r_swap ={r[1], r[2], r[3], r[0]};
-wire [3:0] b_swap ={b[1], b[2], b[3], b[0]};
+// wire [3:0] r_swap ={r[1], r[2], r[3], r[0]};
+// wire [3:0] b_swap ={b[1], b[2], b[3], b[0]};
 
 wire [7:0] color_lut[256] = '{
     8'd19, 8'd21, 8'd23,  8'd25,  8'd26,  8'd29,  8'd32,  8'd35,  8'd38,  8'd43,  8'd49,  8'd56,  8'd65,  8'd76,  8'd96,  8'd108,
@@ -362,9 +362,9 @@ wire [7:0] color_lut[256] = '{
 };
 
 always @(posedge clk_48) begin : rgbOutput
-	ri = ~| intensity ? 8'd0 : color_lut[{r_swap, intensity}];
+	ri = ~| intensity ? 8'd0 : color_lut[{r, intensity}];
 	gi = ~| intensity ? 8'd0 : color_lut[{g, intensity}];
-	bi = ~| intensity ? 8'd0 : color_lut[{b_swap, intensity}];
+	bi = ~| intensity ? 8'd0 : color_lut[{b, intensity}];
 end
 
 reg ce_pix;

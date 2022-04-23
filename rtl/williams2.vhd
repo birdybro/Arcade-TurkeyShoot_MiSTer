@@ -802,7 +802,7 @@ port map(
 --  data => rom_prog1_do
 -- );
 
-rom_prog1_cs <= '1' when dn_addr(17 downto 12) = "100101" else '0';
+rom_prog1_cs <= '1' when dn_addr(17 downto 12) = "100110" else '0';
 prog1_rom : work.dpram generic map (8,12)
 port map
 (
@@ -816,26 +816,26 @@ port map
 	q_b => rom_prog1_do
 );
 
-prog2_rom : entity work.turkey_shoot_prog2
-port map(
- clk  => clock_12,
- addr => addr_bus(12 downto 0),
- data => rom_prog2_do
-);
-
--- rom_prog2_cs <= '1' when dn_addr(17 downto 13) = "10100" else '0';
--- prog2_rom : work.dpram generic map (8,13)
--- port map
--- (
--- 	clk_a => clock_12,
--- 	we_a => dn_wr and rom_prog2_cs,
--- 	addr_a => dn_addr(12 downto 0),
--- 	d_a => dn_data,
-
--- 	clk_b => clock_12,
--- 	addr_b => addr_bus(12 downto 0),
--- 	q_b => rom_prog2_do
+-- prog2_rom : entity work.turkey_shoot_prog2
+-- port map(
+--  clk  => clock_12,
+--  addr => addr_bus(12 downto 0),
+--  data => rom_prog2_do
 -- );
+
+rom_prog2_cs <= '1' when dn_addr(17 downto 13) = "10010" else '0';
+prog2_rom : work.dpram generic map (8,13)
+port map
+(
+	clk_a => clock_12,
+	we_a => dn_wr and rom_prog2_cs,
+	addr_a => dn_addr(12 downto 0),
+	d_a => dn_data,
+
+	clk_b => clock_12,
+	addr_b => addr_bus(12 downto 0),
+	q_b => rom_prog2_do
+);
 
 
 -- -- rom17.ic26 + rom15.ic24 
@@ -1122,7 +1122,7 @@ port map(
 --  data => decod_do
 -- );
 
-rom_decoder_cs <= '1' when dn_addr(17 downto 9) = "100110000" else '0';
+rom_decoder_cs <= '1' when dn_addr(17 downto 9) = "100111000" else '0';
 video_addr_decoder : work.dpram generic map (8,9)
 port map
 (

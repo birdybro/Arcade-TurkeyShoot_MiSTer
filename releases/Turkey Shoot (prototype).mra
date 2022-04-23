@@ -63,21 +63,15 @@
         <part crc="4861f063" name="rom17.ic26"/>
         <part crc="421aafa8" name="rom15.ic24"/>
 
-        <!-- BLANK -->
-        <part repeat="4096">0</part>
+        <!-- turkey_shoot_prog2 -->
+        <part crc="fd982687" name="rom2.ic9"/>
+        <part crc="9617054d" name="rom3.ic10"/>
 
         <!-- turkey_shoot_prog1 -->
         <part crc="effc33f1" name="rom18.ic55"/>
 
         <!-- turkey_shoot_decoder -->
         <part crc="0ea3f7fb" name="7649.ic60"/>
-
-        <!-- BLANK -->
-        <part repeat="8192">0</part>
-
-        <!-- turkey_shoot_prog2 -->
-        <part crc="fd982687" name="rom2.ic9"/>
-        <part crc="9617054d" name="rom3.ic10"/>
 
     </rom>
 

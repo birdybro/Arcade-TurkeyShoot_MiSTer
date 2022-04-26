@@ -1,11 +1,11 @@
 <misterromdescription>
-    <name>Turkey Shoot (prototype)</name>
+    <name>Turkey Shoot - The Day They Took Over</name>
     <region>World</region>
     <homebrew>no</homebrew>
     <bootleg>no</bootleg>
-    <version></version>
+    <version>Prototype</version>
     <alternative></alternative>
-    <platform></platform>
+    <platform>Williams 2nd Generation</platform>
     <series></series>
     <year>1984</year>
     <manufacturer>Williams</manufacturer>
@@ -15,7 +15,7 @@
     <parent>tshoot</parent>
     <mameversion>0220</mameversion>
     <rbf>TurkeyShoot</rbf>
-    <about></about>
+    <about author="darfpga" source="https://github.com/darfpga/vhdl_turkey_shoot" webpage="http://darfpga.blogspot.com/" price="free"></about>
 
     <resolution>15kHz</resolution>
     <rotation>horizontal</rotation>

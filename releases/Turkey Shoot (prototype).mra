@@ -22,9 +22,9 @@
     <flip></flip>
 
     <players>1</players>
-    <joystick></joystick>
+    <joystick>8-way</joystick>
     <special_controls></special_controls>
-    <num_buttons></num_buttons>
+    <num_buttons>3</num_buttons>
     <button_names></button_names>
 
     <rom index="0" zip="tshoot.zip" md5="none" type="merged">
@@ -74,5 +74,7 @@
         <part crc="0ea3f7fb" name="7649.ic60"/>
 
     </rom>
+
+    <mratimestamp>20220426014201</mratimestamp>
 
 </misterromdescription>
